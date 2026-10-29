@@ -1,0 +1,25 @@
+name: PoC - forged Feishu thread marker
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  poc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch unmodified upstream script (larksuite/meegle-cli@main)
+        run: |
+          curl -sSfL --max-time 30 -o /tmp/notify.js \
+            https://raw.githubusercontent.com/larksuite/meegle-cli/main/.github/scripts/github-issue-to-feishu.js
+          echo "13f53ef135270a4540916ddb8f660010464b0157ac9d93d23e3d0f680f12ccd1  /tmp/notify.js" | sha256sum -c -
+      - name: Run harness
+        env:
+          POC_REPO: ${{ github.repository }}
+          POC_SCRIPT: /tmp/notify.js
+        run: node harness.js
